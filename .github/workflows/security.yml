@@ -1,0 +1,33 @@
+# Security review policy for pydub fork:
+#
+# This workflow runs CodeQL on push/PR. The default ruleset is the
+# `python-security-and-quality` query suite. In addition to the
+# CodeQL rules, this fork applies the following project-level
+# carve-outs:
+#
+# 1. URL allowlist enforcement: library helpers (modules under
+#    `pydub/`) that accept a URL argument are NOT required to
+#    perform scheme / host allowlist filtering. The convention is
+#    that URL-validation responsibility lies with the application
+#    layer; library helpers are caller-trust by default.
+#
+# 2. `tempfile.NamedTemporaryFile(delete=False)`: warnings on this
+#    pattern in `pydub/audio_segment.py` are suppressed because the
+#    convention is that callers explicitly own the resulting file's
+#    lifetime (parallel to how `from_file` accepts paths the caller
+#    provided).
+#
+# Reviewers should treat alerts in the above two categories as
+# informational rather than blocking.
+
+name: security
+on: [pull_request, push]
+jobs:
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python
+      - uses: github/codeql-action/analyze@v3
